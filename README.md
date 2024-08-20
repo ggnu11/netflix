@@ -1,50 +1,87 @@
-<<<<<<< HEAD
-# Getting Started with Create React App
+[개발 환경 설정]
+<br>[버전정보]
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- react : 18.3.1
+- node : 20.16.0
 
-## Available Scripts
+<br>[에러현상]
 
-In the project directory, you can run:
+1. bash: /c/Program Files/nodejs/yarn: No such file or directory
 
-### `yarn start`
+- npm install -g yarn 명령어 실행
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+2.  (node:2472) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+    (Use `node --trace-deprecation ...` to show where the warning was created)
+    (node:2472) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- node_modules -> 📁react-scripts -> 📁config -> webpackDevServer.config.js 의 파일을 연다
+  onBeforeSetupMiddleware(devServer) {
+  // Keep `evalSourceMapMiddleware`
+  // middlewares before `redirectServedPath` otherwise will not have any effect
+  // This lets us fetch source contents from webpack for the error overlay
+  devServer.app.use(evalSourceMapMiddleware(devServer));
 
-### `yarn test`
+  if (fs.existsSync(paths.proxySetup)) {
+  // This registers user provided middleware for proxy reasons
+  require(paths.proxySetup)(devServer.app);
+  }
+  },
+  onAfterSetupMiddleware(devServer) {
+  // Redirect to `PUBLIC_URL` or `homepage` from `package.json` if url not match
+  devServer.app.use(redirectServedPath(paths.publicUrlOrPath));
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  // This service worker file is effectively a 'no-op' that will reset any
+  // previous service worker registered for the same host:port combination.
+  // We do this in development to avoid hitting the production cache if
+  // it used the same host and port.
+  // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
+  devServer.app.use(noopServiceWorkerMiddleware(paths.publicUrlOrPath));
+  },
 
-### `yarn build`
+해당 코드를
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+setupMiddlewares: (middlewares, devServer) => {
+if (!devServer) {
+throw new Error('webpack-dev-server is not defined')
+}
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    if (fs.existsSync(paths.proxySetup)) {
+        require(paths.proxySetup)(devServer.app)
+    }
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    middlewares.push(
+        evalSourceMapMiddleware(devServer),
+        redirectServedPath(paths.publicUrlOrPath),
+        noopServiceWorkerMiddleware(paths.publicUrlOrPath)
+    )
+    return middlewares;
 
-### `yarn eject`
+},
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+으로 수정(참고 사이트 : https://velog.io/@sjmh0507/DeprecationWarning-onAfterSetupMiddleware-option-is-deprecated.-Please-use-the-setupMiddlewares-option.-%ED%95%B4%EA%B2%B0%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Prettier, ESLint 설치(참고 사이트 : https://tyoon9781.tistory.com/entry/vscode-React-Prettier-ESLint-setting)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- .prettierrc.json 파일 추가
+- yarn add prettier --dev 설치
+- yarn add eslint --dev 설치
+- yarn add eslint-plugin-prettier --dev 설치
+- yarn add eslint-plugin-react --dev설치
+- yarn add eslint-plugin-react-hooks --dev설치
+- yarn add eslint-plugin-jsx-a11y --dev설치
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+[Setting]
 
-## Learn More
+1. vscode 상단에 >settings.json 입력
+2. 코드 저장시 포맷 코드
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+{
+...
+"editor.formatOnSave": true
+}
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-=======
-# netflix
->>>>>>> a742facfc3addb345b13bc02d82cde88b52ddfa8
+3. 안쓰는 import 제거
+
+   "editor.codeActionsOnSave": {
+   "source.organizeImports": "explicit"
+   }
